@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Governance Control Room — Who Owns the Decision?</title>
+
+<style>
+:root{
+  --vone:#4797cd;
+  --bg:#0b1222;
+  --card:#1a2338;
+  --text:#eef3f8;
+  --muted:#aab4c3;
+  --border:#2b3550;
+  --good:#2ecc71;
+  --warn:#f1c40f;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:radial-gradient(900px 500px at 20% 10%, rgba(71,151,205,.25), transparent 60%), var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.app{
+  width:100%;
+  max-width:1040px;
+  background:rgba(11,18,34,.95);
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+}
+
+header{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+}
+header h1{margin:0;font-size:18px}
+header p{margin:4px 0 0;font-size:13px;color:var(--muted)}
+
+main{
+  padding:20px;
+  display:grid;
+  grid-template-columns:1.4fr .6fr;
+  gap:18px;
+}
+@media(max-width:900px){ main{grid-template-columns:1fr} }
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+}
+
+.howto{
+  background:rgba(71,151,205,.12);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:14px;
+}
+.howto h2{margin:0 0 6px;font-size:14px}
+.howto ul{margin:0;padding-left:18px;font-size:13px;color:var(--muted)}
+.howto li{margin:6px 0}
+
+h3{margin:0 0 8px;font-size:16px}
+p{margin:0 0 12px;font-size:14px;line-height:1.45;color:var(--muted)}
+
+.ticketMeta{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.pill{
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#0f172a;
+  border:1px solid var(--border);
+  font-size:12px;
+  color:var(--muted);
+}
+.pill strong{color:var(--text)}
+
+.ticket{
+  font-size:15px;
+  color:var(--text);
+  margin-bottom:14px;
+}
+
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+@media(max-width:900px){ .grid2{grid-template-columns:1fr} }
+
+.panelTitle{
+  font-size:13px;
+  color:rgba(255,255,255,.85);
+  margin:0 0 8px;
+}
+
+.buttons{display:grid;gap:10px}
+button{
+  background:#10172a;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:12px;
+  border-radius:14px;
+  font-size:14px;
+  cursor:pointer;
+}
+button:hover{border-color:var(--vone)}
+button:disabled{opacity:.6;cursor:not-allowed}
+
+.feedback{
+  display:none;
+  margin-top:12px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  font-size:13px;
+  line-height:1.35;
+  white-space:pre-wrap;
+}
+.feedback.good{background:rgba(46,204,113,.12)}
+.feedback.warn{background:rgba(241,196,15,.12)}
+
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+.btn{
+  background:#0f172a;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:14px;
+  cursor:pointer;
+  font-size:13px;
+}
+.btn.primary{
+  background:rgba(71,151,205,.22);
+  border-color:rgba(71,151,205,.55);
+}
+
+.sidebar h4{font-size:13px;margin:0 0 8px}
+.meter{
+  height:10px;
+  background:#0f172a;
+  border:1px solid var(--border);
+  border-radius:999px;
+  overflow:hidden;
+}
+.fill{height:100%;background:var(--vone);width:0%}
+
+.stat{margin-top:14px;font-size:13px}
+.stat strong{display:block;font-size:18px;margin-top:4px}
+
+.small{font-size:12px;color:var(--muted);line-height:1.4;margin-top:10px}
+
+.codebox{
+  display:none;
+  margin-top:14px;
+  padding:12px;
+  border:1px dashed var(--border);
+  border-radius:12px;
+  background:#0f172a;
+}
+.code{
+  font-family:monospace;
+  font-size:16px;
+  margin-top:6px;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+<header>
+  <h1>Governance Control Room — Who Owns the Decision?</h1>
+  <p>Week 6 · Roles, human-in-the-loop decisions, and accountability when AI makes mistakes</p>
+</header>
+
+<main>
+<section class="card">
+  <div class="howto" id="howto">
+    <h2>How to play</h2>
+    <ul>
+      <li>You’re running an AI Governance Control Room for a school/workplace.</li>
+      <li>Each ticket needs two choices: <strong>who owns it</strong> and <strong>what happens next</strong>.</li>
+      <li>Good governance means clear roles, human review, and accountability.</li>
+      <li>Finish to receive a completion code.</li>
+    </ul>
+  </div>
+
+  <div class="ticketMeta">
+    <span class="pill"><strong>Ticket:</strong> <span id="ticketNum">1</span>/6</span>
+    <span class="pill"><strong>Focus:</strong> <span id="focus">Roles</span></span>
+  </div>
+
+  <h3 id="title"></h3>
+  <p class="ticket" id="ticket"></p>
+
+  <div class="grid2">
+    <div>
+      <p class="panelTitle">1) Assign the governance owner</p>
+      <div class="buttons" id="roleChoices"></div>
+    </div>
+    <div>
+      <p class="panelTitle">2) Choose the next governance action</p>
+      <div class="buttons" id="actionChoices"></div>
+    </div>
+  </div>
+
+  <div class="feedback" id="feedback"></div>
+
+  <div class="actions">
+    <button class="btn primary" id="nextBtn" disabled>Continue</button>
+    <button class="btn" id="restartBtn">Restart</button>
+  </div>
+
+  <div class="codebox" id="codeBox">
+    <strong>Completion Code</strong>
+    <div class="code" id="code"></div>
+    <p class="small" id="scoreMeaning"></p>
+    <div class="actions">
+      <button class="btn primary" onclick="location.reload()">Play Again</button>
+      <a class="btn" href="https://voneacademy.com/courses">Exit</a>
+    </div>
+  </div>
+</section>
+
+<aside class="card sidebar">
+  <h4>Governance Readiness</h4>
+  <div class="meter"><div class="fill" id="fill"></div></div>
+
+  <div class="stat">
+    Score
+    <strong id="score">0</strong>
+  </div>
+
+  <div class="stat">
+    Status
+    <strong id="status">Triaging</strong>
+  </div>
+
+  <p class="small">
+    Strong AI governance = clear ownership + human review + accountability.
+  </p>
+</aside>
+</main>
+</div>
+
+<script>
+const tickets = [
+  {
+    focus:"Roles",
+    title:"Ticket 1: New AI tool request",
+    ticket:"A department wants to use an AI tool for student support messages. They ask: “Can we use it today?”",
+    roles:["AI Product Owner","Data Protection Lead","School Principal / Executive Sponsor","IT Support"],
+    actions:["Run a quick privacy & risk review before use","Approve immediately to move fast","Let students test it without guidelines","Use it first, document later"],
+    correctRole:0,
+    correctAction:0,
+    explain:"Governance starts before deployment. The AI Product Owner should coordinate review so privacy, risk, and oversight are addressed early."
+  },
+  {
+    focus:"Human-in-the-loop",
+    title:"Ticket 2: High-stakes recommendation",
+    ticket:"An AI system recommends which students need disciplinary action based on patterns in past incidents.",
+    roles:["Compliance Coordinator","Human Review Panel (staff)","Marketing Lead","Vendor Sales Rep"],
+    actions:["Require human review before any action is taken","Allow automatic decisions to save time","Hide the use of AI to avoid complaints","Only review decisions when someone appeals"],
+    correctRole:1,
+    correctAction:0,
+    explain:"When outcomes affect people, human-in-the-loop review is essential. Decisions should not be fully automated."
+  },
+  {
+    focus:"Accountability",
+    title:"Ticket 3: AI made a mistake",
+    ticket:"A learner reports the AI falsely flagged them for cheating. The system won’t explain why.",
+    roles:["Executive Sponsor","AI Product Owner","Student","Social Media Team"],
+    actions:["Pause use, investigate, and document corrective actions","Tell the learner “the AI is never wrong”","Delete logs to avoid scrutiny","Ignore the report unless more complaints happen"],
+    correctRole:1,
+    correctAction:0,
+    explain:"Accountability means investigating errors, using evidence (logs), and taking corrective action. Someone must own the response."
+  },
+  {
+    focus:"Policies & guardrails",
+    title:"Ticket 4: Prompt misuse",
+    ticket:"Staff are using the AI tool to generate private student notes and storing them in shared folders.",
+    roles:["Data Protection Lead","Lunch Supervisor","Student Council","Facilities Manager"],
+    actions:["Implement rules: what data can/can’t be used, and train staff","Continue because it helps productivity","Ban AI entirely with no guidance","Let each staff member decide their own rules"],
+    correctRole:0,
+    correctAction:0,
+    explain:"Policies and training create guardrails. Sensitive data needs rules, access controls, and oversight."
+  },
+  {
+    focus:"Decision structures",
+    title:"Ticket 5: Vendor claims",
+    ticket:"A vendor says: “Our AI is fully compliant and unbiased. No testing needed.”",
+    roles:["Vendor Risk Owner / Procurement","Student","Graphic Designer","Front Desk Staff"],
+    actions:["Require evidence: testing, documentation, controls, and limitations","Accept the claim because it’s in the brochure","Skip review to meet a deadline","Only test after a major incident"],
+    correctRole:0,
+    correctAction:0,
+    explain:"Governance relies on evidence, not claims. Vendor risk review and documentation protect the organization."
+  },
+  {
+    focus:"Ongoing oversight",
+    title:"Ticket 6: Drift and monitoring",
+    ticket:"After 2 months, the AI outputs are getting less accurate and more inconsistent, but no one is monitoring performance.",
+    roles:["Monitoring Owner (assigned role)","Random volunteer","No one (AI runs itself)","Students"],
+    actions:["Set monitoring metrics, review schedule, and escalation path","Ignore it until it causes harm","Turn off feedback so fewer issues are reported","Keep using it because it used to work"],
+    correctRole:0,
+    correctAction:0,
+    explain:"AI governance is ongoing. Monitoring, escalation, and ownership keep systems aligned over time."
+  }
+];
+
+let idx = 0;
+let score = 0;
+
+let roleSelected = null;
+let actionSelected = null;
+
+const ticketNumEl = document.getElementById("ticketNum");
+const focusEl = document.getElementById("focus");
+const titleEl = document.getElementById("title");
+const ticketEl = document.getElementById("ticket");
+const roleChoicesEl = document.getElementById("roleChoices");
+const actionChoicesEl = document.getElementById("actionChoices");
+const feedbackEl = document.getElementById("feedback");
+const nextBtn = document.getElementById("nextBtn");
+const restartBtn = document.getElementById("restartBtn");
+
+const fillEl = document.getElementById("fill");
+const scoreEl = document.getElementById("score");
+const statusEl = document.getElementById("status");
+
+const codeBox = document.getElementById("codeBox");
+const codeEl = document.getElementById("code");
+const scoreMeaningEl = document.getElementById("scoreMeaning");
+
+function setStatus(){
+  if (score >= 85) statusEl.textContent = "Governance Leader";
+  else if (score >= 65) statusEl.textContent = "Strong Oversight";
+  else if (score >= 45) statusEl.textContent = "Developing Governance";
+  else statusEl.textContent = "Triaging";
+}
+
+function updateScore(points){
+  score = Math.max(0, Math.min(100, score + points));
+  fillEl.style.width = score + "%";
+  scoreEl.textContent = score;
+  setStatus();
+}
+
+function render(){
+  const t = tickets[idx];
+  ticketNumEl.textContent = (idx + 1);
+  focusEl.textContent = t.focus;
+  titleEl.textContent = t.title;
+  ticketEl.textContent = t.ticket;
+
+  feedbackEl.style.display = "none";
+  nextBtn.disabled = true;
+  roleSelected = null;
+  actionSelected = null;
+
+  roleChoicesEl.innerHTML = "";
+  actionChoicesEl.innerHTML = "";
+
+  t.roles.forEach((r,i)=>{
+    const b = document.createElement("button");
+    b.textContent = r;
+    b.onclick = ()=>selectRole(i);
+    roleChoicesEl.appendChild(b);
+  });
+
+  t.actions.forEach((a,i)=>{
+    const b = document.createElement("button");
+    b.textContent = a;
+    b.onclick = ()=>selectAction(i);
+    actionChoicesEl.appendChild(b);
+  });
+}
+
+function lockIfReady(){
+  if (roleSelected !== null && actionSelected !== null){
+    // evaluate
+    const t = tickets[idx];
+    const roleCorrect = roleSelected === t.correctRole;
+    const actionCorrect = actionSelected === t.correctAction;
+
+    // scoring: reward governance structure + actions
+    let points = 0;
+    if (roleCorrect) points += 10; else points += 4;
+    if (actionCorrect) points += 10; else points += 4;
+
+    updateScore(points);
+
+    feedbackEl.className = "feedback " + (roleCorrect && actionCorrect ? "good" : "warn");
+    feedbackEl.textContent =
+      (roleCorrect && actionCorrect ? "✅ Strong governance decision.\n\n" : "⚠️ Governance gap.\n\n") +
+      t.explain +
+      "\n\nWhat good governance looks like here: clear ownership, human review where needed, and documented accountability.";
+
+    feedbackEl.style.display = "block";
+    nextBtn.disabled = false;
+
+    // lock buttons
+    [...roleChoicesEl.children].forEach(b=>b.disabled=true);
+    [...actionChoicesEl.children].forEach(b=>b.disabled=true);
+  }
+}
+
+function selectRole(i){
+  roleSelected = i;
+  // visual hint: disable others, keep selected enabled
+  [...roleChoicesEl.children].forEach((b,idx2)=>b.disabled = idx2 !== i);
+  lockIfReady();
+}
+
+function selectAction(i){
+  actionSelected = i;
+  [...actionChoicesEl.children].forEach((b,idx2)=>b.disabled = idx2 !== i);
+  lockIfReady();
+}
+
+nextBtn.onclick = ()=>{
+  idx++;
+  if (idx < tickets.length){
+    render();
+  } else {
+    finish();
+  }
+};
+
+function finish(){
+  document.getElementById("howto").style.display = "none";
+  titleEl.textContent = "Control Room Complete";
+  ticketEl.textContent =
+    "You assigned governance owners, used human-in-the-loop thinking, and handled accountability when AI made mistakes.";
+
+  roleChoicesEl.innerHTML = "";
+  actionChoicesEl.innerHTML = "";
+  feedbackEl.style.display = "none";
+  nextBtn.style.display = "none";
+  restartBtn.style.display = "none";
+
+  const code = "VONE-AI-W6-" + score + "-" + Math.floor(100 + Math.random()*900);
+  codeEl.textContent = code;
+
+  scoreMeaningEl.textContent =
+    score >= 85
+      ? "Score meaning: Excellent. You understand real governance operations: roles, oversight, and accountability."
+      : score >= 65
+        ? "Score meaning: Strong foundation. Review how monitoring and escalation keep systems aligned over time."
+        : score >= 45
+          ? "Score meaning: Developing. Replay and focus on ownership + evidence + human review."
+          : "Score meaning: Starter level. Replay and watch for: who owns it, what happens next, and how mistakes are handled.";
+
+  codeBox.style.display = "block";
+  statusEl.textContent = "Completed";
+}
+
+restartBtn.onclick = ()=>location.reload();
+
+setStatus();
+render();
+</script>
+</body>
+</html>
